@@ -38,31 +38,34 @@ export interface ConsultationBooking {
 }
 
 class DataService {
-  private getQuoteRequests(): QuoteRequest[] {
+  // Private synchronous localStorage getters/setters renamed with underscore prefix
+
+  private _getQuoteRequests(): QuoteRequest[] {
     if (typeof window === 'undefined') return []
     const stored = localStorage.getItem('quoteRequests')
     return stored ? JSON.parse(stored) : []
   }
 
-  private setQuoteRequests(requests: QuoteRequest[]): void {
+  private _setQuoteRequests(requests: QuoteRequest[]): void {
     if (typeof window === 'undefined') return
     localStorage.setItem('quoteRequests', JSON.stringify(requests))
   }
 
-  private getConsultations(): ConsultationBooking[] {
+  private _getConsultations(): ConsultationBooking[] {
     if (typeof window === 'undefined') return []
     const stored = localStorage.getItem('consultations')
     return stored ? JSON.parse(stored) : []
   }
 
-  private setConsultations(consultations: ConsultationBooking[]): void {
+  private _setConsultations(consultations: ConsultationBooking[]): void {
     if (typeof window === 'undefined') return
     localStorage.setItem('consultations', JSON.stringify(consultations))
   }
 
   // Quote Requests
+
   async submitQuoteRequest(data: Omit<QuoteRequest, 'id' | 'status' | 'createdAt'>): Promise<QuoteRequest> {
-    const requests = this.getQuoteRequests()
+    const requests = this._getQuoteRequests()
     const newRequest: QuoteRequest = {
       ...data,
       id: `QR${String(requests.length + 1).padStart(3, '0')}`,
@@ -71,7 +74,7 @@ class DataService {
     }
     
     requests.push(newRequest)
-    this.setQuoteRequests(requests)
+    this._setQuoteRequests(requests)
     
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500))
@@ -80,20 +83,20 @@ class DataService {
   }
 
   async getQuoteRequests(): Promise<QuoteRequest[]> {
-    const requests = this.getQuoteRequests()
+    const requests = this._getQuoteRequests()
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 200))
     return requests
   }
 
   async updateQuoteRequest(id: string, updates: Partial<QuoteRequest>): Promise<QuoteRequest | null> {
-    const requests = this.getQuoteRequests()
+    const requests = this._getQuoteRequests()
     const index = requests.findIndex(r => r.id === id)
     
     if (index === -1) return null
     
     requests[index] = { ...requests[index], ...updates }
-    this.setQuoteRequests(requests)
+    this._setQuoteRequests(requests)
     
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 300))
@@ -102,12 +105,12 @@ class DataService {
   }
 
   async deleteQuoteRequest(id: string): Promise<boolean> {
-    const requests = this.getQuoteRequests()
+    const requests = this._getQuoteRequests()
     const filtered = requests.filter(r => r.id !== id)
     
     if (filtered.length === requests.length) return false
     
-    this.setQuoteRequests(filtered)
+    this._setQuoteRequests(filtered)
     
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 300))
@@ -116,8 +119,9 @@ class DataService {
   }
 
   // Consultations
+
   async submitConsultation(data: Omit<ConsultationBooking, 'id' | 'status' | 'createdAt'>): Promise<ConsultationBooking> {
-    const consultations = this.getConsultations()
+    const consultations = this._getConsultations()
     const newConsultation: ConsultationBooking = {
       ...data,
       id: `CB${String(consultations.length + 1).padStart(3, '0')}`,
@@ -126,7 +130,7 @@ class DataService {
     }
     
     consultations.push(newConsultation)
-    this.setConsultations(consultations)
+    this._setConsultations(consultations)
     
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500))
@@ -135,20 +139,20 @@ class DataService {
   }
 
   async getConsultations(): Promise<ConsultationBooking[]> {
-    const consultations = this.getConsultations()
+    const consultations = this._getConsultations()
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 200))
     return consultations
   }
 
   async updateConsultation(id: string, updates: Partial<ConsultationBooking>): Promise<ConsultationBooking | null> {
-    const consultations = this.getConsultations()
+    const consultations = this._getConsultations()
     const index = consultations.findIndex(c => c.id === id)
     
     if (index === -1) return null
     
     consultations[index] = { ...consultations[index], ...updates }
-    this.setConsultations(consultations)
+    this._setConsultations(consultations)
     
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 300))
@@ -157,12 +161,12 @@ class DataService {
   }
 
   async deleteConsultation(id: string): Promise<boolean> {
-    const consultations = this.getConsultations()
+    const consultations = this._getConsultations()
     const filtered = consultations.filter(c => c.id !== id)
     
     if (filtered.length === consultations.length) return false
     
-    this.setConsultations(filtered)
+    this._setConsultations(filtered)
     
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 300))
@@ -171,9 +175,10 @@ class DataService {
   }
 
   // Analytics
+
   async getAnalytics() {
-    const quoteRequests = this.getQuoteRequests()
-    const consultations = this.getConsultations()
+    const quoteRequests = this._getQuoteRequests()
+    const consultations = this._getConsultations()
     
     const totalQuoteRequests = quoteRequests.length
     const totalConsultations = consultations.length
@@ -195,60 +200,61 @@ class DataService {
   }
 
   // Initialize with mock data if empty
+
   initializeMockData() {
     if (typeof window === 'undefined') return
     
-    const quoteRequests = this.getQuoteRequests()
-    const consultations = this.getConsultations()
+    const quoteRequests = this._getQuoteRequests()
+    const consultations = this._getConsultations()
     
     if (quoteRequests.length === 0) {
       const mockQuoteRequests: QuoteRequest[] = [
-                 {
-           id: "QR001",
-           name: "John Smith",
-           email: "john.smith@email.com",
-           phone: "(555) 123-4567",
-           vehicleMake: "Toyota",
-           vehicleModel: "Camry",
-           vehicleYear: "2020",
-           transportType: "local",
-           transportDetails: "Need transport from downtown to suburban area, vehicle in good condition",
-           urgency: "urgent",
-           status: "quoted",
-           createdAt: "2024-01-15T10:30:00Z",
-           quoteAmount: 450
-         },
-         {
-           id: "QR002",
-           name: "Sarah Johnson",
-           email: "sarah.j@email.com",
-           phone: "(555) 234-5678",
-           vehicleMake: "Ford",
-           vehicleModel: "F-150",
-           vehicleYear: "2019",
-           transportType: "long-distance",
-           transportDetails: "Long distance transport from city to rural area, truck needs special handling",
-           urgency: "normal",
-           status: "pending",
-           createdAt: "2024-01-16T14:20:00Z"
-         },
-         {
-           id: "QR003",
-           name: "Mike Wilson",
-           email: "mike.w@email.com",
-           phone: "(555) 345-6789",
-           vehicleMake: "BMW",
-           vehicleModel: "X3",
-           vehicleYear: "2021",
-           transportType: "interstate",
-           transportDetails: "Interstate transport for luxury vehicle, requires enclosed transport",
-           urgency: "emergency",
-           status: "completed",
-           createdAt: "2024-01-14T09:15:00Z",
-           quoteAmount: 320
-         }
+        {
+          id: "QR001",
+          name: "John Smith",
+          email: "john.smith@email.com",
+          phone: "(555) 123-4567",
+          vehicleMake: "Toyota",
+          vehicleModel: "Camry",
+          vehicleYear: "2020",
+          transportType: "local",
+          transportDetails: "Need transport from downtown to suburban area, vehicle in good condition",
+          urgency: "urgent",
+          status: "quoted",
+          createdAt: "2024-01-15T10:30:00Z",
+          quoteAmount: 450
+        },
+        {
+          id: "QR002",
+          name: "Sarah Johnson",
+          email: "sarah.j@email.com",
+          phone: "(555) 234-5678",
+          vehicleMake: "Ford",
+          vehicleModel: "F-150",
+          vehicleYear: "2019",
+          transportType: "long-distance",
+          transportDetails: "Long distance transport from city to rural area, truck needs special handling",
+          urgency: "normal",
+          status: "pending",
+          createdAt: "2024-01-16T14:20:00Z"
+        },
+        {
+          id: "QR003",
+          name: "Mike Wilson",
+          email: "mike.w@email.com",
+          phone: "(555) 345-6789",
+          vehicleMake: "BMW",
+          vehicleModel: "X3",
+          vehicleYear: "2021",
+          transportType: "interstate",
+          transportDetails: "Interstate transport for luxury vehicle, requires enclosed transport",
+          urgency: "emergency",
+          status: "completed",
+          createdAt: "2024-01-14T09:15:00Z",
+          quoteAmount: 320
+        }
       ]
-      this.setQuoteRequests(mockQuoteRequests)
+      this._setQuoteRequests(mockQuoteRequests)
     }
     
     if (consultations.length === 0) {
@@ -270,49 +276,49 @@ class DataService {
           onSiteService: true,
           status: "confirmed",
           createdAt: "2024-01-15T11:45:00Z",
-          mechanicAssigned: "Bruce Wayne"
+          mechanicAssigned: "Tom"
         },
         {
           id: "CB002",
-          name: "David Brown",
-          email: "david.b@email.com",
+          name: "David Lee",
+          email: "david.l@email.com",
           phone: "(555) 567-8901",
-          address: "456 Oak Ave, Somewhere, ST 67890",
+          address: "456 Oak St, Othertown, ST 23456",
           vehicleMake: "Chevrolet",
           vehicleModel: "Silverado",
-          vehicleYear: "2020",
-          issueType: "brakes",
-          issueDescription: "Brake pedal feels soft, possible brake fluid leak",
-          preferredDate: "2024-01-18",
+          vehicleYear: "2017",
+          issueType: "transmission",
+          issueDescription: "Transmission slipping during gear changes",
+          preferredDate: "2024-01-22",
           preferredTime: "afternoon",
           emergencyService: true,
-          onSiteService: true,
-          status: "in-progress",
-          createdAt: "2024-01-16T08:30:00Z",
-          mechanicAssigned: "Tony Stark"
+          onSiteService: false,
+          status: "pending",
+          createdAt: "2024-01-16T13:30:00Z"
         },
         {
           id: "CB003",
-          name: "Lisa Anderson",
-          email: "lisa.a@email.com",
+          name: "Linda Martinez",
+          email: "linda.m@email.com",
           phone: "(555) 678-9012",
-          address: "789 Pine Rd, Elsewhere, ST 11111",
-          vehicleMake: "Nissan",
-          vehicleModel: "Altima",
-          vehicleYear: "2019",
-          issueType: "transmission",
-          issueDescription: "Transmission slipping, won't shift properly",
-          preferredDate: "2024-01-22",
-          preferredTime: "flexible",
+          address: "789 Pine St, Elsewhere, ST 34567",
+          vehicleMake: "Tesla",
+          vehicleModel: "Model 3",
+          vehicleYear: "2022",
+          issueType: "electrical",
+          issueDescription: "Battery drain and electrical system faults",
+          preferredDate: "2024-01-18",
+          preferredTime: "evening",
           emergencyService: false,
-          onSiteService: false,
-          status: "pending",
-          createdAt: "2024-01-17T16:20:00Z"
+          onSiteService: true,
+          status: "completed",
+          createdAt: "2024-01-14T10:00:00Z",
+          mechanicAssigned: "Alice"
         }
       ]
-      this.setConsultations(mockConsultations)
+      this._setConsultations(mockConsultations)
     }
   }
 }
 
-export const dataService = new DataService() 
+export default new DataService()
